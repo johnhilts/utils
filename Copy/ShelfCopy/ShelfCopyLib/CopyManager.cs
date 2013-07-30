@@ -28,8 +28,8 @@ namespace ShelfCopyLib
             foreach (var file in _fileHelper.CopyFiles(_sourceRootFolder, _destinationRootFolder, string.Empty))
             {
                 var sourceFile = file;
-                var destinationFile = file.Replace(_sourceRootFolder, _destinationRootFolder);
-                _fileCopyLog.AppendFormat("Copying {0} to {1}\r\n", file, destinationFile);
+                var destinationFile = sourceFile.Replace(_sourceRootFolder, _destinationRootFolder);
+                _fileCopyLog.AppendFormat("Copying {0} to {1}\r\n", sourceFile, destinationFile);
             }
 
             return true;
