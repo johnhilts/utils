@@ -6,6 +6,19 @@ namespace ShelfCopyLib
 {
     public class FileHelper : IFileHelper
     {
+        private IFileWrapper _fileWrapper;
+
+        public FileHelper()
+            : this(new FileWrapper())
+        {
+
+        }
+
+        public FileHelper(IFileWrapper fileWrapper)
+        {
+            _fileWrapper = fileWrapper;
+        }
+
         public void SetCurrentDirectory(string sourceRootFolder)
         {
             Directory.SetCurrentDirectory(sourceRootFolder);
@@ -13,7 +26,7 @@ namespace ShelfCopyLib
 
         public IEnumerable<string> CopyFiles(string sourceRootFolder, string destinationRootFolder, string projectName)
         {
-            foreach (var sourceFile in Directory.GetFiles(sourceRootFolder))
+            foreach (var sourceFile in _fileWrapper.DirectoryGetFiles(sourceRootFolder))
             {
                 var fileInfo = new FileInfo(sourceFile);
 
@@ -23,17 +36,29 @@ namespace ShelfCopyLib
                 if (fileInfo.Extension.Equals(".csproj", StringComparison.CurrentCultureIgnoreCase))
                     projectName = sourceFile;
 
-                if (!(fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly)) && IsFileInProject(fileInfo.Name, fileInfo.Extension, projectName))
+                if (!(_fileWrapper.IsFileReadOnly(fileInfo)) && IsFileInProject(fileInfo.Name, fileInfo.Extension, projectName))
                 {
                     yield return sourceFile;
                     var destinationFile = sourceFile.Replace(sourceRootFolder, destinationRootFolder);
                     if (!Directory.Exists(destinationRootFolder))
                         Directory.CreateDirectory(destinationRootFolder);
-                    File.Copy(sourceFile, destinationFile, true);
+                    var errorOccurred = false;
+                    IOException exceptionInfo = null;
+                    try
+                    {
+                        _fileWrapper.FileCopy(sourceFile, destinationFile, true);
+                    }
+                    catch (IOException e)
+                    {
+                        errorOccurred = true;
+                        exceptionInfo = e;
+                    }
+                    if (errorOccurred)
+                        yield return string.Format("\r\nERROR: Unable to copy {0}\r\nMessage: {1}\r\nDetails: {2}", sourceFile, exceptionInfo.Message, exceptionInfo.ToString());
                 }
             }
 
-            foreach (var directory in Directory.GetDirectories(sourceRootFolder))
+            foreach (var directory in _fileWrapper.DirectoryGetDirectories(sourceRootFolder))
             {
                 var directoryName = directory.Replace(sourceRootFolder + "\\", string.Empty);
                 foreach (var file in CopyFiles(directory, Path.Combine(destinationRootFolder, directoryName), projectName))
@@ -54,7 +79,7 @@ namespace ShelfCopyLib
             if (extension.Equals(".sln", StringComparison.OrdinalIgnoreCase) || extension.Equals(".csproj", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            string projectText = File.ReadAllText(projectName).ToLower();
+            string projectText = _fileWrapper.FileReadAllText(projectName).ToLower();
             return projectText.Contains(fileName.ToLower());
         }
     }

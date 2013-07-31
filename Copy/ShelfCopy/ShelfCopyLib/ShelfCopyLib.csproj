@@ -41,7 +41,9 @@
   <ItemGroup>
     <Compile Include="CopyManager.cs" />
     <Compile Include="FileHelper.cs" />
+    <Compile Include="FileWrapper.cs" />
     <Compile Include="IFileHelper.cs" />
+    <Compile Include="IFileWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

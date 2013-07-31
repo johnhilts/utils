@@ -49,6 +49,7 @@
     <Compile Include="IntegrationTests\CopyManagerTests.cs" />
     <Compile Include="UnitTests\CopyManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTests\FileHelperTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ShelfCopyLib\ShelfCopyLib.csproj">
