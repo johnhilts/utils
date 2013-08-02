@@ -1,10 +1,18 @@
 using System.Collections.Generic;
+using System.IO;
 
 namespace ShelfCopyLib
 {
     public interface IFileHelper
     {
-        void SetCurrentDirectory(string sourceRootFolder);
-        IEnumerable<string> CopyFiles(string sourceRootFolder, string destinationRootFolder, string projectName);
+        bool FileCopy(string sourceFile, string destinationFile, bool overwriteIfExists);
+
+        string FileReadAllText(string fileName);
+
+        IEnumerable<string> DirectoryGetFiles(string path);
+
+        IEnumerable<string> DirectoryGetDirectories(string path);
+
+        bool IsFileReadOnly(FileInfo fileInfo);
     }
 }
