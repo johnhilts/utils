@@ -55,7 +55,7 @@ namespace ShelfCopyLib
                 if (fileInfo.Extension.Equals(".csproj", StringComparison.CurrentCultureIgnoreCase))
                     projectName = sourceFile;
 
-                if (!(_fileHelper.IsFileReadOnly(fileInfo)) && IsFileInProject(fileInfo.Name, fileInfo.Extension, projectName))
+                if (!(_fileHelper.IsFileReadOnly(fileInfo)) && (IsFileInProject(fileInfo.Name, fileInfo.Extension, projectName) || IsWebFile(fileInfo)))
                 {
                     yield return sourceFile;
                     var destinationFile = sourceFile.Replace(sourceRootFolder, destinationRootFolder);
@@ -85,6 +85,17 @@ namespace ShelfCopyLib
                     yield return file;
                 }
             }
+        }
+
+        private bool IsWebFile(FileInfo fileInfo)
+        {
+            if (fileInfo.DirectoryName.ToLower().Contains("debug")) // TODO: replace this with an ignore list
+                return false;
+
+            return fileInfo.Extension.Equals(".aspx", StringComparison.CurrentCultureIgnoreCase) ||
+                   fileInfo.Extension.Equals(".ascx", StringComparison.CurrentCultureIgnoreCase) ||
+                   fileInfo.Extension.Equals(".master", StringComparison.CurrentCultureIgnoreCase) ||
+                   fileInfo.Extension.Equals(".cs", StringComparison.CurrentCultureIgnoreCase);
         }
 
         private bool IsFileInProject(string fileName, string extension, string projectName)
