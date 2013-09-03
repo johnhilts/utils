@@ -28,7 +28,7 @@ namespace ShelfCopyTests.UnitTests
         }
 
         [Test]
-        public void WhenGivenValidFileListFileCopyShouldSucceed()
+        public void CopyManager_TypicalScenario_ShouldSucceed()
         {
             // arrange
             var testFileNameList = new string[] { _projectName, "File1.txt", "File2.txt", "File3.txt", }.AsEnumerable();
@@ -54,7 +54,7 @@ namespace ShelfCopyTests.UnitTests
         }
 
         [Test]
-        public void WhenFileCopyThrowsExceptionShouldStillSucceed()
+        public void CopyManager_ExceptionThrown_ShouldSucceed()
         {
             // arrange
             var sourceFile = Path.Combine(_sourceRootFolder, "File1.txt");

@@ -23,7 +23,7 @@ namespace ShelfCopyTests.IntegrationTests
         }
 
         [Test]
-        public void WhenGivenValidFoldersFileCopyShouldSucceed()
+        public void CopyManager_TypicalScenario_ShouldSucceed()
         {
             // arrange
             var regex = new Regex(@"Copying (.+) to", RegexOptions.IgnoreCase);
