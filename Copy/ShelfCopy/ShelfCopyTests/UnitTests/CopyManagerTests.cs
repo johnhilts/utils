@@ -30,10 +30,22 @@ namespace ShelfCopyTests.UnitTests
         [Test]
         public void CopyManager_TypicalScenario_ShouldSucceed()
         {
+            DoTypicalScenario("Copying", false);
+        }
+
+        [Test]
+        public void CopyManager_PreviewOnly_ShouldSucceed()
+        {
+            DoTypicalScenario("Copy Preview", true);
+        }
+
+        private void DoTypicalScenario(string copyActionText, bool isPreview)
+        {
             // arrange
-            var testFileNameList = new string[] { _projectName, "File1.txt", "File2.txt", "File3.txt", }.AsEnumerable();
+            var testFileNameList = new string[] {_projectName, "File1.txt", "File2.txt", "File3.txt",}.AsEnumerable();
             var expectedFileLog = new StringBuilder();
-            testFileNameList.ToList().ForEach(x => expectedFileLog.AppendFormat("Copying {0} to {1}\r\n", Path.Combine(_sourceRootFolder, x), Path.Combine(_destinationRootFolder, x)));
+            testFileNameList.ToList().
+                ForEach(x => expectedFileLog.AppendFormat("{2} {0} to {1}\r\n", Path.Combine(_sourceRootFolder, x), Path.Combine(_destinationRootFolder, x), copyActionText));
             var testFileList = testFileNameList.Select(x => Path.Combine(_sourceRootFolder, x)).ToArray();
             var mockHelper = new Mock<IFileHelper>();
             mockHelper.Setup(x => x.DirectoryGetFiles(_sourceRootFolder)).Returns(testFileList);
@@ -43,7 +55,7 @@ namespace ShelfCopyTests.UnitTests
             foreach (var file in testFileNameList)
                 mockHelper.Setup(x => x.FileCopy(Path.Combine(_sourceRootFolder, file), Path.Combine(_destinationRootFolder, file), true)).Returns(true);
 
-            var copier = new CopyManager(_sourceRootFolder, _destinationRootFolder, mockHelper.Object);
+            var copier = new CopyManager(_sourceRootFolder, _destinationRootFolder, mockHelper.Object, isPreview);
 
             // act
             var isCopySuccess = copier.CopyFiles();
@@ -68,7 +80,7 @@ namespace ShelfCopyTests.UnitTests
             mockHelper.Setup(x => x.FileReadAllText(_projectFile)).Returns(sourceFile);
             mockHelper.Setup(x => x.FileCopy(sourceFile, destinationFile, true)).Throws(new IOException("File in use"));
 
-            var copier = new CopyManager(_sourceRootFolder, _destinationRootFolder, mockHelper.Object);
+            var copier = new CopyManager(_sourceRootFolder, _destinationRootFolder, mockHelper.Object, false);
 
             // act
             var isCopySuccess = copier.CopyFiles();

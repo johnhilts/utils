@@ -25,9 +25,21 @@ namespace ShelfCopyTests.IntegrationTests
         [Test]
         public void CopyManager_TypicalScenario_ShouldSucceed()
         {
+           DoTypicalScenario(false); 
+        }
+
+        [Test]
+        public void CopyManager_Preview_ShouldSucceed()
+        {
+           DoTypicalScenario(true); 
+        }
+
+        private void DoTypicalScenario(bool isPreview)
+        {
             // arrange
-            var regex = new Regex(@"Copying (.+) to", RegexOptions.IgnoreCase);
-            var copier = new CopyManager(_sourceRootFolder, _destinationRootFolder, new FileHelper());
+            var copyActionText = isPreview ? "Copy Preview" : "Copying";
+            var regex = new Regex(string.Format(@"{0} (.+) to", copyActionText), RegexOptions.IgnoreCase);
+            var copier = new CopyManager(_sourceRootFolder, _destinationRootFolder, new FileHelper(), isPreview);
 
             // act
             var isCopySuccess = copier.CopyFiles();

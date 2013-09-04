@@ -12,17 +12,19 @@ namespace ShelfCopyLib
         private readonly string _destinationRootFolder;
         private readonly StringBuilder _fileCopyLog = new StringBuilder();
         private IFileHelper _fileHelper;
+        private readonly bool _isPreview;
 
         public string FileCopyLog
         {
             get { return _fileCopyLog.ToString(); }
         }
 
-        public CopyManager(string sourceRootFolder, string destinationRootFolder, IFileHelper fileHelper)
+        public CopyManager(string sourceRootFolder, string destinationRootFolder, IFileHelper fileHelper, bool isPreview)
         {
             _sourceRootFolder = sourceRootFolder;
             _destinationRootFolder = destinationRootFolder;
             _fileHelper = fileHelper;
+            _isPreview = isPreview;
         }
 
         /// <summary>
@@ -37,7 +39,8 @@ namespace ShelfCopyLib
             {
                 var sourceFile = file;
                 var destinationFile = sourceFile.Replace(_sourceRootFolder, _destinationRootFolder);
-                _fileCopyLog.AppendFormat("Copying {0} to {1}\r\n", sourceFile, destinationFile);
+                var copyActionText = _isPreview ? "Copy Preview" : "Copying";
+                _fileCopyLog.AppendFormat("{2} {0} to {1}\r\n", sourceFile, destinationFile, copyActionText);
             }
 
             return true;
@@ -59,13 +62,14 @@ namespace ShelfCopyLib
                 {
                     yield return sourceFile;
                     var destinationFile = sourceFile.Replace(sourceRootFolder, destinationRootFolder);
-                    if (!Directory.Exists(destinationRootFolder))
+                    if (!Directory.Exists(destinationRootFolder) && !_isPreview)
                         Directory.CreateDirectory(destinationRootFolder);
                     var errorOccurred = false;
                     IOException exceptionInfo = null;
                     try
                     {
-                        _fileHelper.FileCopy(sourceFile, destinationFile, true);
+                        if (!_isPreview)
+                            _fileHelper.FileCopy(sourceFile, destinationFile, true);
                     }
                     catch (IOException e)
                     {
