@@ -32,5 +32,10 @@ namespace ShelfCopyLib
         {
             return fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
         }
+
+        public bool FileExists(string path)
+        {
+            return File.Exists(path);
+        }
     }
 }

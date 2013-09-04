@@ -14,5 +14,7 @@ namespace ShelfCopyLib
         IEnumerable<string> DirectoryGetDirectories(string path);
 
         bool IsFileReadOnly(FileInfo fileInfo);
+
+        bool FileExists(string path);
     }
 }
