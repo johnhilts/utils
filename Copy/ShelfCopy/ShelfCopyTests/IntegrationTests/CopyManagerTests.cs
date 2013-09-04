@@ -58,8 +58,11 @@ namespace ShelfCopyTests.IntegrationTests
                     Assert.That(File.Exists(sourceFileName), Is.True, string.Format("File: {0} does not exists", sourceFileName));
                     var destinationFileName = sourceFileName.Replace(_sourceRootFolder, _destinationRootFolder);
                     var destinationFileInfo = new FileInfo(destinationFileName);
-                    Assert.That(destinationFileInfo.Directory.Exists, Is.True, string.Format("Destination folder {0} does not exist", destinationFileInfo.DirectoryName));
-                    Assert.That(File.Exists(destinationFileName), Is.True, string.Format("File: {0} does not exists", destinationFileName));
+                    if (!isPreview)
+                    {
+                        Assert.That(destinationFileInfo.Directory.Exists, Is.True, string.Format("Destination folder {0} does not exist", destinationFileInfo.DirectoryName));
+                        Assert.That(File.Exists(destinationFileName), Is.True, string.Format("File: {0} does not exists", destinationFileName));
+                    }
                     var sourceFileInfo = new FileInfo(sourceFileName);
                     var isReadonly = sourceFileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
                     Assert.That(isReadonly, Is.False, string.Format("File: {0} is read-only", sourceFileName)); // NOTE: this only works if there are in fact files checked out

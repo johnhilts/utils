@@ -39,7 +39,7 @@ namespace ShelfCopyLib
         {
             GetIgnoreList();
             SetCurrentDirectory(_sourceRootFolder);
-            foreach (var file in CopyFiles(_sourceRootFolder, _destinationRootFolder, string.Empty))
+            foreach (var file in CopyFiles(_sourceRootFolder, _destinationRootFolder))
             {
                 var sourceFile = file;
                 var destinationFile = sourceFile.Replace(_sourceRootFolder, _destinationRootFolder);
@@ -63,16 +63,13 @@ namespace ShelfCopyLib
             _ignoreList.RemoveAll(string.IsNullOrEmpty);
         }
 
-        private IEnumerable<string> CopyFiles(string sourceRootFolder, string destinationRootFolder, string projectName)
+        private IEnumerable<string> CopyFiles(string sourceRootFolder, string destinationRootFolder)
         {
             foreach (var sourceFile in _fileHelper.DirectoryGetFiles(sourceRootFolder))
             {
                 var fileInfo = new FileInfo(sourceFile);
 
-                if (fileInfo.Extension.Equals(".csproj", StringComparison.CurrentCultureIgnoreCase))
-                    projectName = sourceFile;
-
-                if (!(_fileHelper.IsFileReadOnly(fileInfo)) && (IsFileInProject(fileInfo.Name, fileInfo.Extension, projectName) || IsWebFile(fileInfo)) && !IsIgnoredFile(fileInfo))
+                if (!(_fileHelper.IsFileReadOnly(fileInfo)) && !IsIgnoredFile(fileInfo))
                 {
                     yield return sourceFile;
                     var destinationFile = sourceFile.Replace(sourceRootFolder, destinationRootFolder);
@@ -98,7 +95,7 @@ namespace ShelfCopyLib
             foreach (var directory in _fileHelper.DirectoryGetDirectories(sourceRootFolder))
             {
                 var directoryName = directory.Replace(sourceRootFolder + "\\", string.Empty);
-                foreach (var file in CopyFiles(directory, Path.Combine(destinationRootFolder, directoryName), projectName))
+                foreach (var file in CopyFiles(directory, Path.Combine(destinationRootFolder, directoryName)))
                 {
                     yield return file;
                 }
@@ -109,32 +106,6 @@ namespace ShelfCopyLib
         {
             // NOTE: this is just a simple "contains string" check ... later on change to use RegEx if necessary
             return _ignoreList.Exists(x => fileInfo.FullName.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) >= 0);
-        }
-
-        private bool IsWebFile(FileInfo fileInfo)
-        {
-            if (fileInfo.DirectoryName.ToLower().Contains("debug")) 
-                return false;
-
-            return fileInfo.Extension.Equals(".aspx", StringComparison.CurrentCultureIgnoreCase) ||
-                   fileInfo.Extension.Equals(".ascx", StringComparison.CurrentCultureIgnoreCase) ||
-                   fileInfo.Extension.Equals(".master", StringComparison.CurrentCultureIgnoreCase) ||
-                   fileInfo.Extension.Equals(".cs", StringComparison.CurrentCultureIgnoreCase);
-        }
-
-        private bool IsFileInProject(string fileName, string extension, string projectName)
-        {
-            if (string.IsNullOrEmpty(projectName))
-                return false;
-
-            if (extension.Equals(".dll", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            if (extension.Equals(".sln", StringComparison.OrdinalIgnoreCase) || extension.Equals(".csproj", StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            string projectText = _fileHelper.FileReadAllText(projectName).ToLower();
-            return projectText.Contains(fileName.ToLower());
         }
 
         private void SetCurrentDirectory(string sourceRootFolder)

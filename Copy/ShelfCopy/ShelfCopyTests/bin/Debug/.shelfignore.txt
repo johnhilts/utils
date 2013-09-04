@@ -1,0 +1,11 @@
+Debug
+AssemblyInfo.cs
+ReSharper
+\bin\
+.suo
+.user
+~
+upgradelog
+upgradereport
+.png
+
