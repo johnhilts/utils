@@ -25,6 +25,24 @@ namespace ParserTests
         }
 
         [Test]
+        public  void ElmahXmlParser_UnflatFile_FlattenFile()
+        {
+            // arrange
+            var fileName = "unflattenendFile.xml";
+            var fileContents = _guid1.ToString() + ",<error\r\n<item name=\"SomeItem\">\r\n<value=\"abc123\"></item>\r\n" + _guid2 + ",<error\r\n<item name=\"SomethingElse\">\r\n<value=\"def456\"></item>\r\n";
+            var expectedFlattenedFileContents = string.Join("\r\n", (fileContents.Split("\r\n".ToCharArray()))).Replace("\r\n", " ").Replace("</item>" + _guid2, "</item>\r\n" + _guid2);
+            var helper = new Mock<IFileHelper>();
+            helper.Setup(x => x.ReadAllLines(fileName)).Returns(fileContents.Split("\r\n".ToCharArray()));
+            var parser = new ElmahXmlParser(helper.Object);
+
+            // act
+            var actualFlattenedFileContents = parser.FlattenFileContents(fileName);
+
+            // assert
+            Assert.That(actualFlattenedFileContents, Is.EqualTo(expectedFlattenedFileContents), "Wrong Flattened File Contents");
+        }
+
+        [Test]
         public void ElmahXmlParser_ParseScriptName_GetList()
         {
             // arrange
@@ -32,8 +50,8 @@ namespace ParserTests
             var helper = new Mock<IFileHelper>();
             var errorsXmlFileName = "errors.xml";
             helper.Setup(x => x.ReadAllLines(errorsXmlFileName)).Returns(new[] { 
-                string.Format("{{{0}}},HTTP_X_ORIGINAL_URL:/folder1/test1.aspx&#xD;&#xA;H,", _guid1.ToString()),
-                string.Format("{{{0}}},HTTP_X_ORIGINAL_URL:/folder2/test2.aspx&#xD;&#xA;H,", _guid2.ToString()),
+                string.Format("{{{0}}},<item\r\n name=\"URL\">\r\n<value\r\nstring=\"/folder1/test1.aspx\" />", _guid1.ToString()),
+                string.Format("{{{0}}},<item\r\n name=\"URL\">\r\n<value\r\nstring=\"/folder2/test2.aspx\" />", _guid2.ToString()),
             });
             var parser = new ElmahXmlParser(helper.Object);
 

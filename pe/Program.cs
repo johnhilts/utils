@@ -16,9 +16,10 @@ namespace pe
             Console.WriteLine("Starting parser engine ...");
 
             var parser = new ElmahXmlParser(new FileHelper());
-            var scriptNameList = parser.GetScriptNameList("errors.xml");
-            var stackTraceList = parser.GetStackTraceList("errors.xml");
-            var userAgentList = parser.GetUserAgentList("errors.xml");
+            parser.FlattenFileContents("errors.xml");
+            var scriptNameList = parser.GetScriptNameList("flatErrors.xml");
+            var stackTraceList = parser.GetStackTraceList("flatErrors.xml");
+            var userAgentList = parser.GetUserAgentList("flatErrors.xml");
             var outputLines = new StringBuilder("ID\tPage\tStackTrace\tUserAgent\r\n");
             var count = scriptNameList.Count;
             Console.WriteLine("Page Count: {0}\r\nStack Trace Count: {1}\r\nUser Agent Count: {2}", count, stackTraceList.Count, userAgentList.Count);

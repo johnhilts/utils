@@ -11,7 +11,7 @@ namespace Parser
     {
         public IEnumerable<string> ReadAllLines(string fileName)
         {
-            foreach (var line in File.ReadAllLines(fileName))
+            foreach (var line in File.ReadLines(fileName))
             {
                 yield return line;
             }

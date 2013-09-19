@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,17 +19,17 @@ namespace Parser
 
         public Dictionary<Guid, string> GetScriptNameList(string elmahXmlFileName)
         {
-            return GetListWithGuidFromFileUsingRegex(elmahXmlFileName, @"HTTP_X_ORIGINAL_URL\:(.+?)&#xD;", 1);
+            return GetListWithGuidFromFileUsingRegex(elmahXmlFileName, "(?<=HTTP_X_ORIGINAL_URL:).+?(?=&#xD;&#xA;)", null);
         }
 
         public Dictionary<Guid, string> GetStackTraceList(string elmahXmlFileName)
         {
-            return GetListWithGuidFromFileUsingRegex(elmahXmlFileName, @"detail\=""(.+)""", 1);
+            return GetListWithGuidFromFileUsingRegex(elmahXmlFileName, @"(?<=detail\="").+?(?="")", null);
         }
 
         public Dictionary<Guid, string> GetUserAgentList(string elmahXmlFileName)
         {
-            return GetListWithGuidFromFileUsingRegex(elmahXmlFileName, @"HTTP_USER_AGENT\:(.+?)&#xD;", 1);
+            return GetListWithGuidFromFileUsingRegex(elmahXmlFileName, "(?<=HTTP_USER_AGENT:).+?(?=&#xD;&#xA;)", null);
         }
 
         private Dictionary<Guid, string> GetListWithGuidFromFileUsingRegex(string fileName, string regexPattern, int? groupIndex)
@@ -58,19 +59,31 @@ namespace Parser
             return list;
         }
 
-        private List<string> GetListFromFileUsingRegex(string fileName, string regexPattern, int? groupIndex)
+        public void FlattenFileContents(string fileName)
         {
-            var re = new Regex(regexPattern, RegexOptions.IgnoreCase);
-            var list = new List<string>();
+            var lines = new StringBuilder();
+            var input = File.OpenRead(fileName);
+            var output = File.CreateText("flatErrors.xml");
             foreach (var line in _fileHelper.ReadAllLines(fileName))
             {
-                if (re.IsMatch(line))
-                    if (groupIndex.HasValue)
-                        list.Add(re.Match(line).Groups[groupIndex.Value].Value);
-                    else
-                        list.Add(re.Match(line).Value);
+                if (line.Contains("</error>"))
+                {
+                    lines.AppendLine(line);
+                    //File.WriteAllText("flatErrors.xml", lines.ToString());
+                    output.Write(lines.ToString());
+                    lines = new StringBuilder();
+                }
+                else
+                {
+                    lines.Append(line.Replace("\r\n", " "));
+                }
             }
-            return list;
+
+            //File.WriteAllText("flatErrors.xml", lines.ToString());
+            output.Write(lines.ToString());
+            output.Flush();
+            output.Close();
+            output.Dispose();
         }
     }
 }
